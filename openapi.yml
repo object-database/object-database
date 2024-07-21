@@ -1,0 +1,259 @@
+openapi: 3.0.1
+info:
+  title: API
+  version: '0.1'
+servers:
+  - url: http://localhost:5000
+    description: "Development"
+  - url: https://someserver.projects.bbdgrad.com
+    description: "Hosted"  
+paths:
+  /api/meeting:
+    post:
+      tags:
+        - Meeting
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingDto'
+      responses:
+        '201':
+          description: Success
+        '400':
+          description: If something is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostMeetingErrors'
+    get:
+      tags:
+        - Meeting
+      parameters:
+      - name: id
+        in: query
+        required: true
+        description: the internal id of the meeting
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingDto'
+        '400':
+          description: Error if meeting not found
+    delete:
+      tags:
+        - Meeting
+      parameters:
+      - name: id
+        in: query
+        required: true
+        description: the internal id of the meeting
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingDto'
+        '400':
+          description: Error if meeting not found
+
+  /api/meeting/invite:
+    post:
+      tags:
+        - Meeting Invites
+      description: Invite users to a meeting, if they can be scheduled
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingInvite'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingDto'
+        '400':
+          description: Displays errors about the meeting
+
+  /api/meeting/remove:
+    post:
+      tags:
+        - Meeting Invites
+      description: Removes Users from a Meeting
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeetingInvite'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingDto'
+        '400':
+          description: Displays errors about the meeting
+
+  
+  /api/user:
+    post:
+      tags:
+        - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfo'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    get:
+      tags:
+        - User
+      parameters:
+      - name: id
+        in: query
+        required: true
+        description: the internal id of the user
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Error if user not found
+    delete:
+      tags: 
+        - User
+      parameters:
+      - name: id
+        in: query
+        required: true
+        description: the internal id of the user
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Something went wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDeleteError'
+
+
+components:
+  schemas:
+    #################### Meetings ####################
+    MeetingDto:
+      type: object
+      required:
+        - location
+        - meetingStart
+        - meetingEnd
+        - meetingType
+      properties:
+        meetingType:
+          type: string
+          description: type of meeting (perhaps it will let us know which room it chose?)
+          enum:
+            - Online
+            - Physical
+        location:
+          $ref: '#/components/schemas/MeetingLocation'
+        meetingStart:
+          type: string
+          format: date-time
+          description: start time of meeting in UTC time
+        meetingEnd:
+          type: string
+          format: date-time
+          description: end time of meeting in UTC time
+        attendees:
+          type: array
+          items: 
+            type: integer
+          description: array of IDs of people you want to invite
+    PostMeetingErrors:
+      type: object
+      properties:
+        errorMessage:
+          type: string
+          description: Message explaining what's wrong
+          enum:
+            - Some of your attendees don't exist
+            - That time doesn't take up a multiple of 15 minutes
+            - End time is before start time
+            - Invalid Room
+    MeetingLocation:
+      type: object
+      properties:
+        office:
+          type: string
+          description: office building
+          enum:
+            - Rosebank
+            - Cape Town
+        room:
+          type: string
+          description: Room chosen (Optional, only if Location is set)
+          enum:
+            - Room1
+            - Room2
+    MeetingInvite:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Internal ID of the meeting
+        attendees:
+          type: array
+          items: 
+            type: integer
+          description: array of IDs of people you want to invite
+
+
+    #################### Users ####################
+    User:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/UserInfo'
+      properties:
+        userId:
+          type: string
+
+    UserInfo:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+
+    UserDeleteError:
+      properties:
+        errorMessage:
+          type: string
+          enum:
+            - User is part of a meeting
+            - Something else
