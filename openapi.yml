@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: API
-  version: '0.1'
+  version: '1.0'
 servers:
   - url: http://localhost:5000
     description: "Development"
@@ -173,6 +173,8 @@ components:
         - meetingEnd
         - meetingType
       properties:
+        meetingOwner:
+          type: integer
         meetingType:
           type: string
           description: type of meeting (perhaps it will let us know which room it chose?)
@@ -240,7 +242,7 @@ components:
       - $ref: '#/components/schemas/UserInfo'
       properties:
         userId:
-          type: string
+          type: integer
 
     UserInfo:
       type: object
