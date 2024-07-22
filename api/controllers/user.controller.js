@@ -1,6 +1,6 @@
-import {HttpStatusCodes} from "../utils/index.js";
+import {StatusCodes} from "http-status-codes";
 
 
 export const getAllUsers = async (req, res) => {
-  return res.status(HttpStatusCodes.OK).json({message: "Get all users"});
+  return res.status(StatusCodes.OK).json({message: "Get all users"});
 }
