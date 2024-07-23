@@ -1,6 +1,7 @@
 import cors from "cors";
 import bodyParser from "body-parser";
 import express from 'express';
+import { router } from "./routes/index.js";
 require('dotenv').config({ override: true });
 
 const app = express();
@@ -13,6 +14,7 @@ app.get("/", (req, res) => {
   res.send(JSON.stringify({ message: "API is Up" }));
 });
 
+app.use('/api', router);
 
 app.listen(PORT, (error) => {
   if (!error) {
