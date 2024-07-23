@@ -1,0 +1,75 @@
+name: "Terraform action"
+on: 
+  push:
+    branches:
+      - main
+    paths:
+      - 'Terraform/**'
+      - '.github/workflows/aws-setup.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: workflow-group
+  cancel-in-progress: false
+    
+permissions:
+  id-token: write # This is required for aws oidc connection
+  contents: read # This is required for actions/checkout
+
+env:
+  TF_LOG: INFO
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+        - name: Git checkout
+          uses: actions/checkout@v3
+    
+        - name: Configure AWS credentials from AWS account
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+            role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+            aws-region: ${{ secrets.AWS_REGION }}
+            role-session-name: GitHub-OIDC-TERRAFORM
+    
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@v2
+          with:
+              terraform_version: '>=1.4.0'
+    
+        - name: Terraform fmt
+          id: fmt
+          run: |
+              cd Terraform
+              terraform fmt -check
+          continue-on-error: true
+    
+        - name: Terraform Init
+          id: init
+          run: |
+            cd Terraform
+            terraform init
+    
+        - name: Terraform Validate
+          id: validate
+          run: | 
+            cd  Terraform
+            terraform validate -no-color
+    
+        - name: Terraform Plan
+          id: plan
+          run: |
+            cd Terraform
+            terraform plan -no-color
+
+        - name: Terraform Apply
+          run: |
+            cd Terraform
+            terraform apply -auto-approve -input=false  
+              
