@@ -88,20 +88,20 @@ resource "aws_elastic_beanstalk_environment" "server_env" {
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:default"
     name      = "HealthCheckPath"
-    value     = "/health"
+    value     = "/api/health"
   }
 
-  # setting {
-  #   namespace = "aws:elbv2:listener:443"
-  #   name      = "Protocol"
-  #   value     = "HTTPS"
-  # }
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "Protocol"
+    value     = "HTTPS"
+  }
 
-  # setting {
-  #   namespace = "aws:elbv2:listener:443"
-  #   name      = "ListenerEnabled"
-  #   value     = "true"
-  # }
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "ListenerEnabled"
+    value     = "true"
+  }
 
   setting {
     namespace = "aws:elbv2:listener:80"
@@ -127,23 +127,9 @@ resource "aws_elastic_beanstalk_environment" "server_env" {
     value     = aws_security_group.eb_security_group_lb.id
   }
 
-  # setting {
-  #   namespace = "aws:elbv2:listener:443"
-  #   name      = "SSLCertificateArns"
-  #   value     = "arn:aws:acm:eu-west-1:387198229710:certificate/cea7404e-5990-47b8-8735-06d666dd39e6" # Replace with your SSL certificate ARN
-  # }
-
-  # Optional: redirect HTTP to HTTPS
-  # setting {
-  #   namespace = "aws:elbv2:listener:80"
-  #   name      = "Rules"
-  #   value     = "Redirect HTTP to HTTPS"
-  # }
-
-  # setting {
-  #   namespace = "aws:elbv2:listener:Redirect HTTP to HTTPS"
-  #   name      = "Rules"
-  #   value     = "path-pattern /* -> redirect: HTTPS://#{host}:443/#{path}?#{query}"
-  # }
-
+  setting {
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLCertificateArns"
+    value     = "arn:aws:acm:eu-west-1:804180393465:certificate/6aa5589e-6f10-4b55-8452-395d6edd7c91" # Replace with your SSL certificate ARN
+  }
 }
