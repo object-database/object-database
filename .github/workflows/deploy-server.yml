@@ -1,0 +1,69 @@
+name: Deploy server
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'api/**'
+      - '.github/workflows/deploy-server.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: workflow-group
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: deploy-backend-session
+          aws-region: ${{secrets.AWS_REGION}}
+
+      - name: Generate .env
+        run: |
+            cd api
+            echo "PORT=${{ secrets.PORT }}" > .env 
+            echo "MODE=production" >> .env
+            echo "AWS_REGION=${{ secrets.AWS_REGION}}" >> .env
+
+      - name: Package artifact
+        run: zip -r ./server.zip .env .dockerignore *
+        working-directory: api
+
+      - name: list files
+        run: |
+            cd api
+            ls -la
+            
+      - name: Upload artifact to S3
+        run: |
+          cd api
+          aws s3 cp server.zip s3://${{ secrets.SERVER_RELEASE_BUCKET_NAME }}/application-${{ github.run_id }}.zip
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: deploy-server-session
+          aws-region: ${{secrets.AWS_REGION}}
+
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          aws elasticbeanstalk create-application-version --application-name ${{ secrets.SERVER_APP_NAME }} --version-label ${{ github.run_id }} --source-bundle S3Bucket="${{ secrets.SERVER_RELEASE_BUCKET_NAME }}",S3Key="application-${{ github.run_id }}.zip"
+          aws elasticbeanstalk update-environment --application-name ${{ secrets.SERVER_APP_NAME }} --environment-name ${{ secrets.SERVER_ENV_NAME }} --version-label ${{ github.run_id }}
