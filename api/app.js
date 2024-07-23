@@ -7,8 +7,7 @@ import dotenv from 'dotenv';
 dotenv.config({ override: true });
 
 const app = express();
-const PORT = process.env.PORT | 80;
-
+const PORT = process.env.PORT || 80;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -25,5 +24,3 @@ app.listen(PORT, (error) => {
     console.log("Error occurred, server can't start", error);
   }
 });
-
-
