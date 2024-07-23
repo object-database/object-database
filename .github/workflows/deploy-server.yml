@@ -9,9 +9,9 @@ on:
       - '.github/workflows/deploy-server.yml'
   workflow_dispatch:
 
-concurrency:
-  group: workflow-group
-  cancel-in-progress: false
+# concurrency:
+#   group: workflow-group
+#   cancel-in-progress: false
 
 permissions:
   id-token: write
