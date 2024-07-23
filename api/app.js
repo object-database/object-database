@@ -2,7 +2,9 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import express from 'express';
 import { router } from "./routes/index.js";
-require('dotenv').config({ override: true });
+import dotenv from 'dotenv';
+
+dotenv.config({ override: true });
 
 const app = express();
 const PORT = process.env.PORT | 80;
