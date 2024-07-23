@@ -1,24 +1,24 @@
 import Realm from "realm";
 
 //User Class
-class User extends Realm.Object {
+export class User extends Realm.Object {
   static schema = {
     name: "User",
     properties: {
-      UserId: "int",
-      Name: "string",
-      Email: "string"
+      _id: { type: "objectId", default: () => new Realm.BSON.ObjectId() },
+      name: "string",
+      email: "string"
     },
-    primaryKey: "UserId"
+    primaryKey: "_id"
   };
 }
 
 //Meeting Class
-class Meeting extends Realm.Object {
+export class Meeting extends Realm.Object {
   static schema = {
     name: "Meeting",
     properties: {
-      MeetingId: "int",
+      _id: { type: "objectId", default: () => new Realm.BSON.ObjectId() },
       MeetingOwner: "User",
       MeetingAttendees: "User[]",
       Title: "string",
@@ -27,12 +27,12 @@ class Meeting extends Realm.Object {
       onlineMeeting: "onlineMeeting?",
       workMeeting: "workMeeting?"
     },
-    primaryKey: "MeetingId"
+    primaryKey: "_id"
   };
 }
 
 //onlineMeeting Class
-class onlineMeeting extends Realm.Object {
+export class onlineMeeting extends Realm.Object {
   static schema = {
     name: "onlineMeeting",
     embedded: true,
@@ -43,35 +43,35 @@ class onlineMeeting extends Realm.Object {
 }
 
 //TimeSlot Class
-class TimeSlot extends Realm.Object {
+export class TimeSlot extends Realm.Object {
   static schema = {
     name: "TimeSlot",
     properties: {
-      TimeSlotId: "int",
+      _id: { type: "objectId", default: () => new Realm.BSON.ObjectId() },
       StartTime: "date", 
       EndTime: "date", 
     },
-    primaryKey: "TimeSlotId"
+    primaryKey: "_id"
   };
 }
 
 //Room Class
-class Room extends Realm.Object {
+export class Room extends Realm.Object {
   static schema = {
     name: "Room",
     properties: {
-      RoomId: "int",
+      _id: { type: "objectId", default: () => new Realm.BSON.ObjectId() },
       Location: "string",
       Name: "string",
       Capacity: "int",
       TimeSlots: "TimeSlot[]"
     },
-    primaryKey: "RoomId"
+    primaryKey: "_id"
   };
 }
 
 //workMeeting Class
-class workMeeting extends Realm.Object {
+export class workMeeting extends Realm.Object {
   static schema = {
     name: "workMeeting",
     embedded: true,
@@ -80,18 +80,3 @@ class workMeeting extends Realm.Object {
     },
   };
 }
-
-const openRealm = async () => {
-  try {
-    const realm = await Realm.open({
-      schema: [User, Meeting, onlineMeeting, TimeSlot, Room, workMeeting],
-    });
-    console.log("Realm opened successfully");
-    return realm;
-
-  } catch (error) {
-    console.error("Error opening Realm:", error);
-  }
-};
-
-openRealm();

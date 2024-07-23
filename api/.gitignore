@@ -131,3 +131,7 @@ dist
 
 
 .idea
+
+# Realm
+mongodb-realm/
+default.realm*
