@@ -1,5 +1,7 @@
 import Realm from "realm";
-import {User, Meeting, onlineMeeting, TimeSlot, Room, workMeeting} from "../models/classes.model.js";
+import dotenv from 'dotenv';
+dotenv.config({ override: true });
+import { User, Meeting, onlineMeeting, TimeSlot, Room, workMeeting } from "../models/classes.model.js";
 
 const openRealm = async () => {
   try {
