@@ -74,6 +74,10 @@ export class Room extends Realm.Object {
     },
     primaryKey: "_id"
   };
+
+  getName() {
+    return this.Name;
+  }
 }
 
 //workMeeting Class
