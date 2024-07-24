@@ -18,6 +18,9 @@ const openRealm = async () => {
         initialSubscriptions: {
           update: (subs, realm) => {
             subs.add(realm.objects(User));
+            subs.add(realm.objects(Meeting));
+            subs.add(realm.objects(Room));
+            subs.add(realm.objects(TimeSlot));
           },
         },
       }
