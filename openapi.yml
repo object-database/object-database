@@ -16,10 +16,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MeetingDto'
+              $ref: '#/components/schemas/CreateMeeting'
       responses:
         '201':
           description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingDto'
         '400':
           description: If something is invalid
           content:
@@ -69,7 +73,7 @@ paths:
     post:
       tags:
         - Meeting Invites
-      description: Invite users to a meeting, if they can be scheduled
+      description: Invite users to a meeting, and returns a message warning you if they have been double booked
       requestBody:
         content:
           application/json:
@@ -104,6 +108,20 @@ paths:
                 $ref: '#/components/schemas/MeetingDto'
         '400':
           description: Displays errors about the meeting
+    
+  /api/meeting/all:
+    get:
+      tags:
+        - Meeting
+      responses:
+        '200':
+          description: All meetings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MeetingDto'
 
   
   /api/user:
@@ -126,10 +144,10 @@ paths:
       tags:
         - User
       parameters:
-      - name: id
+      - name: email
         in: query
         required: true
-        description: the internal id of the user
+        description: the email of the user
         schema:
           type: string
       responses:
@@ -145,10 +163,10 @@ paths:
       tags: 
         - User
       parameters:
-      - name: id
+      - name: email
         in: query
         required: true
-        description: the internal id of the user
+        description: the email of the user
         schema:
           type: string
       responses:
@@ -160,7 +178,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDeleteError'
-                
+
+  /api/user/all:
+    get:
+      tags:
+        - User
+      responses:
+        '200':
+          description: All users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
   /api/reset:
     post:
       tags:
@@ -179,31 +211,63 @@ components:
         - location
         - meetingStart
         - meetingEnd
-        - meetingType
       properties:
-        meetingOwner:
-          type: integer
-        meetingType:
+        _id:
           type: string
-          description: type of meeting (perhaps it will let us know which room it chose?)
-          enum:
-            - Online
-            - Physical
-        location:
-          $ref: '#/components/schemas/MeetingLocation'
-        meetingStart:
+        meetingOwner:
+          type: string
+          example: email@email.com
+          description: email of meeting owner
+        startTime:
           type: string
           format: date-time
           description: start time of meeting in UTC time
-        meetingEnd:
+        endTime:
           type: string
           format: date-time
           description: end time of meeting in UTC time
+        title:
+          type: string
+          description: A nice name for the meeting
         attendees:
-          type: array
-          items: 
-            type: integer
-          description: array of IDs of people you want to invite
+          $ref: '#/components/schemas/UserEmailArray'
+        room:
+          $ref: '#/components/schemas/Room'
+        teamsLink:
+          type: string
+      
+    CreateMeeting:
+      type: object
+      required:
+        - meetingOwner
+        - meetingStart
+        - meetingEnd
+        - title
+      properties:
+        meetingOwner:
+          type: string
+          example: email@email.com
+          description: email of meeting owner
+        startTime:
+          type: string
+          format: date-time
+          description: start time of meeting in UTC time
+        endTime:
+          type: string
+          format: date-time
+          description: end time of meeting in UTC time
+        title:
+          type: string
+          description: A nice name for the meeting
+        attendees:
+          $ref: '#/components/schemas/UserEmailArray'
+        roomId:
+          type: string
+          description: mutually exclusive with teamsLink
+        teamsLink:
+          type: string
+          description: mutually exclusive with roomId
+      
     PostMeetingErrors:
       type: object
       properties:
@@ -215,32 +279,14 @@ components:
             - That time doesn't take up a multiple of 15 minutes
             - End time is before start time
             - Invalid Room
-    MeetingLocation:
-      type: object
-      properties:
-        office:
-          type: string
-          description: office building
-          enum:
-            - Rosebank
-            - Cape Town
-        room:
-          type: string
-          description: Room chosen (Optional, only if Location is set)
-          enum:
-            - Room1
-            - Room2
     MeetingInvite:
       type: object
       properties:
-        id:
+        _id:
           type: string
           description: Internal ID of the meeting
         attendees:
-          type: array
-          items: 
-            type: integer
-          description: array of IDs of people you want to invite
+          $ref: '#/components/schemas/UserEmailArray'
 
 
     #################### Users ####################
@@ -249,7 +295,7 @@ components:
       allOf:
       - $ref: '#/components/schemas/UserInfo'
       properties:
-        userId:
+        _id:
           type: integer
 
     UserInfo:
@@ -267,3 +313,24 @@ components:
           enum:
             - User is part of a meeting
             - Something else
+
+    UserEmailArray:
+      type: array
+      items: 
+        type: string
+      example: [meeting@email.com, email@meeting.com]
+      description: array of emails of people you want to invite
+
+    #################### Room ####################
+    Room:
+      type: object
+      properties:
+        location:
+          type: string
+        name:
+          type: string
+        capacity:
+          type: integer
+        timeSlots:
+          type: object
+          ## Todo
