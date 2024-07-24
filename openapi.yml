@@ -160,7 +160,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDeleteError'
-
+                
+  /api/reset:
+    post:
+      tags:
+        - Reset
+      description: Deletes everything and recreates with dummy data
+      responses:
+        '200':
+          description: Success
 
 components:
   schemas:

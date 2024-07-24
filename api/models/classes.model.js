@@ -11,6 +11,12 @@ export class User extends Realm.Object {
     },
     primaryKey: "_id"
   };
+
+  // Just a thing I put in cause I wasn't sure how to work with the objects :)
+  // ~ Sean
+  getName() {
+    return this.name;
+  }
 }
 
 //Meeting Class
