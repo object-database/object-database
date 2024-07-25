@@ -1,3 +1,4 @@
+
 import Realm from "realm";
 
 //User Class
@@ -28,8 +29,8 @@ export class Meeting extends Realm.Object {
       MeetingOwner: "User",
       MeetingAttendees: "User[]",
       Title: "string",
-      StartTime: "date", 
-      EndTime: "date", 
+      StartTime: "date",
+      EndTime: "date",
       onlineMeeting: "onlineMeeting?",
       workMeeting: "workMeeting?"
     },
@@ -54,8 +55,8 @@ export class TimeSlot extends Realm.Object {
     name: "TimeSlot",
     properties: {
       _id: { type: "objectId", default: () => new Realm.BSON.ObjectId() },
-      StartTime: "date", 
-      EndTime: "date", 
+      StartTime: "date",
+      EndTime: "date",
     },
     primaryKey: "_id"
   };

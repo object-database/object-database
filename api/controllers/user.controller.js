@@ -3,6 +3,10 @@ import { realm } from "../utils/realm.js";
 import { User } from "../models/classes.model.js";
 import Realm from "realm";
 
+export const getUserByEmail = async (email) => {
+  return realm.objects(User).find((user) => user.email === email);
+}
+
 export const getUser = async (req, res) => {
   let user;
   if (req.query.email) {
