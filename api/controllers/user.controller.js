@@ -1,6 +1,6 @@
-import { StatusCodes } from "http-status-codes";
-import { realm } from "../utils/realm.js";
-import { User } from "../models/classes.model.js";
+import {StatusCodes} from "http-status-codes";
+import {realm} from "../utils/realm.js";
+import {User, Meeting} from "../models/classes.model.js";
 import Realm from "realm";
 
 export const getUserByEmail = async (email) => {
@@ -68,3 +68,19 @@ export const deleteUser = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   return res.status(StatusCodes.OK).json(realm.objects(User));
 };
+
+export const getUserMeetings = async (req, res) => {
+  try {
+    const {email} = req.query;
+    const user = await getUserByEmail(email);
+    if (user) {
+      const meetings = realm.objects(Meeting).filter((meeting) => meeting.MeetingAttendees.includes(user));
+      res.status(StatusCodes.OK).json(meetings);
+    } else {
+      res.status(StatusCodes.BAD_REQUEST).json("User does not exist");
+    }
+
+  } catch (err) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).send(err.message);
+  }
+}
