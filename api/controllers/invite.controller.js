@@ -10,21 +10,25 @@ export const inviteUsers = async (req, res) => {
     if (_meetingId || attendees) {
       //Check if meeting exists
       //let meeting = realm.objects(Meeting).find((meeting) => meeting._id === _meetingId);
-      realm.write(() => {
-        let id = new Realm.BSON.ObjectID(_meetingId);
-        let meeting = realm.objectForPrimaryKey(Meeting, id);
-        if (meeting) {
-          attendees.forEach(async email => {
-            const user = await UserController.getUserByEmail(email);
+      let id = new Realm.BSON.ObjectID(_meetingId);
+      let meeting = realm.objectForPrimaryKey(Meeting, id);
+      if (meeting) {
+        for (const email of attendees) {
+          const user = await UserController.getUserByEmail(email);
+          realm.write(() => {
             if (user != null) {
-              meeting.MeetingAttendees.push(meeting);
+              const exists = meeting.MeetingAttendees.contains(user);
+              if (exists) {
+                meeting.MeetingAttendees.push(user);
+              }
             }
           })
-        } else {
-          res.status(StatusCodes.BAD_REQUEST).send("Meeting does not exist");
         }
 
-      })
+        res.status(StatusCodes.OK).json(meeting);
+      } else {
+        res.status(StatusCodes.BAD_REQUEST).send("Meeting does not exist");
+      }
     } else {
       res.status(StatusCodes.BAD_REQUEST).send("Invalid Body");
     }
