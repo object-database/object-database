@@ -2,13 +2,14 @@ import { StatusCodes } from "http-status-codes";
 import { realm } from "../utils/realm.js";
 import { users } from "../models/user.fixtures.js";
 import { rooms } from "../models/room.fixtures.js";
+import { timeslots } from "../models/timeslots.fixtures.js"
 import { Meeting, Room, User } from "../models/classes.model.js";
 
 export const reset = async (req, res) => {
   realm.write(() => {
     // Delete all objects from the realm.
-    // realm.deleteAll();
-    
+    realm.deleteAll();
+
     // Create some objects here
     let createdUsers = [];
     users.forEach((user) => {
@@ -16,11 +17,19 @@ export const reset = async (req, res) => {
       console.log("Created", out.getName());
       createdUsers.push(out);
     });
+
     let createdRooms = [];
     rooms.forEach((room) => {
       let out = realm.create(Room, room, "modified");
       console.log("Created", out.getName());
       createdRooms.push(out);
+    });
+
+    let createdTimeslots = [];
+    timeslots.forEach((timeslot) => {
+      let out = realm.create(Room, timeslot, "modified");
+      console.log("Created", out.getName());
+      createdTimeslots.push(out);
     });
 
     // Create meetings - a little bit more complicated.
