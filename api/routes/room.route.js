@@ -8,3 +8,4 @@ roomRouter.get('/', RoomController.getRoomById);
 roomRouter.get('/all', RoomController.getAllRooms);
 roomRouter.post('/', RoomController.createRoom);
 roomRouter.delete('/', RoomController.deleteRoom);
+roomRouter.get('/timeSlots', RoomController.getTimeSlotsByRoomId);
