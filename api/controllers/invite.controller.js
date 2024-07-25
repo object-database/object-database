@@ -9,7 +9,6 @@ export const inviteUsers = async (req, res) => {
     const { attendees, _meetingId } = req.body;
     if (_meetingId || attendees) {
       //Check if meeting exists
-      //let meeting = realm.objects(Meeting).find((meeting) => meeting._id === _meetingId);
       let id = new Realm.BSON.ObjectID(_meetingId);
       let meeting = realm.objectForPrimaryKey(Meeting, id);
       if (meeting) {
@@ -17,8 +16,8 @@ export const inviteUsers = async (req, res) => {
           const user = await UserController.getUserByEmail(email);
           realm.write(() => {
             if (user != null) {
-              const exists = meeting.MeetingAttendees.contains(user);
-              if (exists) {
+              const exists = meeting.MeetingAttendees.includes(user);
+              if (!exists && (user.email !== meeting.MeetingOwner.email)) {
                 meeting.MeetingAttendees.push(user);
               }
             }
