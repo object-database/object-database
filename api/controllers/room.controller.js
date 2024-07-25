@@ -2,6 +2,7 @@ import {StatusCodes} from "http-status-codes";
 import {realm} from "../utils/realm.js";
 import {Room} from "../models/classes.model.js";
 import Realm from "realm";
+import { TimeSlot } from "../models/classes.model.js";
 
 export const getAllRooms = async (req, res) => {
   try {
@@ -76,6 +77,26 @@ export const getRoomById = async (req, res) => {
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       errorMessage: "Failed to fetch room",
+      error: error.message,
+    });
+  }
+};
+
+export const getTimeSlotsByRoomId = async (req, res) => {
+  const { roomId } = req.params;
+
+  try {
+    const room = realm.objectForPrimaryKey("Room", new Realm.BSON.ObjectId(roomId));
+    if (room) {
+      const TimeSlot = realm.objects("TimeSlot").filtered("roomId == $0", new Realm.BSON.ObjectId(roomId));
+      const TimeSlotsArray = Array.from(TimeSlot);
+      res.status(StatusCodes.OK).json(TimeSlotsArray);
+    } else {
+      res.status(StatusCodes.NOT_FOUND).json({ errorMessage: "Room not found" });
+    }
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      errorMessage: "Failed to fetch TimeSlots",
       error: error.message,
     });
   }
