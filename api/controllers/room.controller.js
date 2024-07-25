@@ -83,14 +83,12 @@ export const getRoomById = async (req, res) => {
 };
 
 export const getTimeSlotsByRoomId = async (req, res) => {
-  const { roomId } = req.params;
+  const { roomId } = req.query;
 
   try {
-    const room = realm.objectForPrimaryKey("Room", new Realm.BSON.ObjectId(roomId));
+    const room = realm.objectForPrimaryKey(Room, new Realm.BSON.ObjectId(roomId));
     if (room) {
-      const TimeSlot = realm.objects("TimeSlot").filtered("roomId == $0", new Realm.BSON.ObjectId(roomId));
-      const TimeSlotsArray = Array.from(TimeSlot);
-      res.status(StatusCodes.OK).json(TimeSlotsArray);
+      res.status(StatusCodes.OK).json(room.TimeSlots);
     } else {
       res.status(StatusCodes.NOT_FOUND).json({ errorMessage: "Room not found" });
     }
