@@ -3,6 +3,7 @@ import {realm} from "../utils/realm.js";
 import {
   Meeting,
   Room,
+  User,
   onlineMeeting,
   workMeeting,
 } from "../models/classes.model.js";
@@ -15,34 +16,55 @@ export const createMeeting = async (req, res) => {
     endTime,
     roomId,
     teamsLink,
+    attendees,
+    meetingOwner
   } = req.body;
 
   try {
     let newMeeting;
     realm.write(() => {
-      const meetingOwner = realm.objects(Meeting).find((user) => user.email === req.query.email);
-      const meetingAttendees = meetingAttendeesIds.map((attendee) =>
-        realm.objects(Meeting).find((user) => user.email === attendee)
+      const meetingOwnerUser = realm.objects(User).find((user) => user.email === meetingOwner);
+      const meetingAttendees = attendees.map((attendee) =>
+        realm.objects(User).find((user) => user.email === attendee)
       );
 
+      if (attendees.includes(meetingOwner)) {
+        throw new Error("Owner cannot also be an attendee");
+      }
+      if (meetingAttendees.includes(undefined)) {
+        throw new Error("One or more of the attendees cannot be located");
+      }
+
       if (roomId || teamsLink) {
-        newMeeting = realm.create("Meeting", {
+        let room = realm.objectForPrimaryKey(
+          Room,
+          new Realm.BSON.ObjectId(roomId)
+        );
+        if (roomId && !room) {
+          throw new Error("Room ID doesn't exist");
+        }
+        if (room && room.Capacity < meetingAttendees.length + 1) {
+          if (!teamsLink) {
+            throw new Error(`Room is too full, capacity of ${room.Capacity}, but ${meetingAttendees.length + 1} people are attending (including the owner)`);
+          }
+        }
+        
+        let meetingToCreate = {
           _id: new Realm.BSON.ObjectId(),
-          MeetingOwner: meetingOwner,
+          MeetingOwner: meetingOwnerUser,
           MeetingAttendees: meetingAttendees,
           Title: title,
           StartTime: new Date(startTime),
           EndTime: new Date(endTime),
-          onlineMeeting: {
-            teamsLink,
-          },
-          workMeeting: {
-            room: realm.objectForPrimaryKey(
-              "Room",
-              new Realm.BSON.ObjectId(roomId)
-            ),
-          },
-        });
+        }
+        if (teamsLink) {
+          meetingToCreate.onlineMeeting = {teamsLink};
+        }
+        if (roomId) {
+          meetingToCreate.workMeeting = {room};
+        }
+
+        newMeeting = realm.create("Meeting", meetingToCreate);
       } else {
         throw new Error('We need a roomId or a teamsLink');
       }
