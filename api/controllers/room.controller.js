@@ -1,6 +1,6 @@
-import { StatusCodes } from "http-status-codes";
-import { realm } from "../utils/realm.js";
-import { Room } from "../models/classes.model.js";
+import {StatusCodes} from "http-status-codes";
+import {realm} from "../utils/realm.js";
+import {Room} from "../models/classes.model.js";
 import Realm from "realm";
 
 export const getAllRooms = async (req, res) => {
@@ -15,9 +15,9 @@ export const getAllRooms = async (req, res) => {
 };
 
 export const createRoom = async (req, res) => {
-	const { location, name, capacity, timeSlots } = req.body;
+  const {location, name, capacity, timeSlots} = req.body;
 
-	try {
+  try {
     let newRoom;
     realm.write(() => {
       newRoom = realm.create("Room", {
@@ -43,16 +43,16 @@ export const createRoom = async (req, res) => {
 };
 
 export const deleteRoom = async (req, res) => {
-	const { roomId } = req.params;
+  const {roomId} = req.params;
 
   try {
     realm.write(() => {
       const roomToDelete = realm.objectForPrimaryKey("Room", new Realm.BSON.ObjectId(roomId));
       if (roomToDelete) {
         realm.delete(roomToDelete);
-        res.status(StatusCodes.OK).json({ message: "Room deleted successfully" });
+        res.status(StatusCodes.OK).json({message: "Room deleted successfully"});
       } else {
-        res.status(StatusCodes.NOT_FOUND).json({ errorMessage: "Room not found" });
+        res.status(StatusCodes.NOT_FOUND).json({errorMessage: "Room not found"});
       }
     });
   } catch (error) {
@@ -64,14 +64,14 @@ export const deleteRoom = async (req, res) => {
 };
 
 export const getRoomById = async (req, res) => {
-	const { roomId } = req.params;
+  const {roomId} = req.params;
 
   try {
     const room = realm.objectForPrimaryKey("Room", new Realm.BSON.ObjectId(roomId));
     if (room) {
       res.status(StatusCodes.OK).json(room);
     } else {
-      res.status(StatusCodes.NOT_FOUND).json({ errorMessage: "Room not found" });
+      res.status(StatusCodes.NOT_FOUND).json({errorMessage: "Room not found"});
     }
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
