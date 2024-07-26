@@ -1,5 +1,5 @@
-import {StatusCodes} from "http-status-codes";
-import {realm} from "../utils/realm.js";
+import { StatusCodes } from "http-status-codes";
+import { realm } from "../utils/realm.js";
 import {
   Meeting,
   Room,
@@ -71,7 +71,7 @@ export const createMeeting = async (req, res) => {
         if (room && !isTimeSlotAvailable) {
           throw new Error('The room is not available at the requested time');
         }
-        
+
         const roomMeetings = realm.objects(Meeting).filtered('workMeeting.room._id == $0', room._id);
         const hasConflict = room && roomMeetings.some(meeting => {
           const meetingStartTime = new Date(meeting.StartTime);
@@ -82,7 +82,7 @@ export const createMeeting = async (req, res) => {
         if (room && hasConflict) {
           throw new Error('The room is already booked for the requested time');
         }
-        
+
         let meetingToCreate = {
           _id: new Realm.BSON.ObjectId(),
           MeetingOwner: meetingOwnerUser,
@@ -92,10 +92,10 @@ export const createMeeting = async (req, res) => {
           EndTime: new Date(endTime),
         }
         if (teamsLink) {
-          meetingToCreate.onlineMeeting = {teamsLink};
+          meetingToCreate.onlineMeeting = { teamsLink };
         }
         if (roomId) {
-          meetingToCreate.workMeeting = {room};
+          meetingToCreate.workMeeting = { room };
         }
 
         newMeeting = realm.create("Meeting", meetingToCreate);
@@ -114,14 +114,14 @@ export const createMeeting = async (req, res) => {
 };
 
 export const getMeetingById = async (req, res) => {
-  const {meetingId} = req.params;
+  const { meetingId } = req.params;
 
   try {
     const meeting = realm.objectForPrimaryKey("Meeting", new Realm.BSON.ObjectId(meetingId));
     if (meeting) {
       res.status(StatusCodes.OK).json(meeting);
     } else {
-      res.status(StatusCodes.NOT_FOUND).json({errorMessage: "Meeting not found"});
+      res.status(StatusCodes.NOT_FOUND).json({ errorMessage: "Meeting not found" });
     }
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -144,16 +144,16 @@ export const getAllMeetings = async (req, res) => {
 };
 
 export const deleteMeeting = async (req, res) => {
-  const {meetingId} = req.params;
+  const { _meetingId } = req.query;
 
   try {
     realm.write(() => {
-      const meetingToDelete = realm.objectForPrimaryKey("Meeting", new Realm.BSON.ObjectId(meetingId));
+      const meetingToDelete = realm.objectForPrimaryKey("Meeting", new Realm.BSON.ObjectId(_meetingId));
       if (meetingToDelete) {
         realm.delete(meetingToDelete);
-        res.status(StatusCodes.OK).json({message: "Meeting deleted successfully"});
+        res.status(StatusCodes.OK).json({ message: "Meeting deleted successfully" });
       } else {
-        res.status(StatusCodes.NOT_FOUND).json({errorMessage: "Meeting not found"});
+        res.status(StatusCodes.NOT_FOUND).json({ errorMessage: "Meeting not found" });
       }
     });
   } catch (error) {
