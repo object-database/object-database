@@ -22,6 +22,7 @@ export const createMeeting = async (req, res) => {
 
   try {
     let newMeeting;
+    let warning;
     realm.write(() => {
       const meetingOwnerUser = realm.objects(User).find((user) => user.email === meetingOwner);
       const meetingAttendees = attendees.map((attendee) =>
@@ -45,7 +46,7 @@ export const createMeeting = async (req, res) => {
         }
         if (room && room.Capacity < meetingAttendees.length + 1) {
           if (!teamsLink) {
-            throw new Error(`Room is too full, capacity of ${room.Capacity}, but ${meetingAttendees.length + 1} people are attending (including the owner)`);
+            warning = `Room is too full, capacity of ${room.Capacity}, but ${meetingAttendees.length + 1} people are attending (including the owner)`;
           }
         }
 
@@ -104,7 +105,10 @@ export const createMeeting = async (req, res) => {
       }
     });
 
-    res.status(StatusCodes.CREATED).json(newMeeting);
+    res.status(StatusCodes.CREATED).json({
+      ...newMeeting,
+      warning: warning
+    });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       errorMessage: "Failed to create meeting",
