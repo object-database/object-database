@@ -114,10 +114,10 @@ export const createMeeting = async (req, res) => {
 };
 
 export const getMeetingById = async (req, res) => {
-  const { meetingId } = req.params;
+  const { _meetingId } = req.query;
 
   try {
-    const meeting = realm.objectForPrimaryKey("Meeting", new Realm.BSON.ObjectId(meetingId));
+    const meeting = realm.objectForPrimaryKey("Meeting", new Realm.BSON.ObjectId(_meetingId));
     if (meeting) {
       res.status(StatusCodes.OK).json(meeting);
     } else {
