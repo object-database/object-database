@@ -48,6 +48,40 @@ export const createMeeting = async (req, res) => {
             throw new Error(`Room is too full, capacity of ${room.Capacity}, but ${meetingAttendees.length + 1} people are attending (including the owner)`);
           }
         }
+
+        // Extract hours from the start and end times
+        const startHour = new Date(startTime).getHours();
+        const endHour = new Date(endTime).getHours();
+        const startTimeObj = new Date(startTime);
+        const endTimeObj = new Date(endTime);
+
+        // Check for continuous timeslot availability based on hours
+        let currentHour = startHour;
+        let isTimeSlotAvailable = true;
+
+        // Check for timeslots that match the 'currentHour'
+        while (currentHour < endHour && isTimeSlotAvailable) {
+          isTimeSlotAvailable = room.TimeSlots.some(slot => {
+            const slotStartHour = new Date(slot.StartTime).getHours();
+            const slotEndHour = new Date(slot.EndTime).getHours();
+            return slotStartHour <= currentHour && slotEndHour > currentHour;
+          });
+          currentHour++;
+        }
+        if (room && !isTimeSlotAvailable) {
+          throw new Error('The room is not available at the requested time');
+        }
+        
+        const roomMeetings = realm.objects(Meeting).filtered('workMeeting.room._id == $0', room._id);
+        const hasConflict = room && roomMeetings.some(meeting => {
+          const meetingStartTime = new Date(meeting.StartTime);
+          const meetingEndTime = new Date(meeting.EndTime);
+          // Ensure the meeting does not overlap with any existing meetings
+          return (meetingStartTime < endTimeObj && meetingEndTime > startTimeObj) && meeting.workMeeting !== undefined;
+        });
+        if (room && hasConflict) {
+          throw new Error('The room is already booked for the requested time');
+        }
         
         let meetingToCreate = {
           _id: new Realm.BSON.ObjectId(),
