@@ -8,7 +8,8 @@ const openRealm = async () => {
     const app = new Realm.App({
       id: process.env.REALM_APP_ID,
     });
-    const anonymousUser = await app.logIn(Realm.Credentials.anonymous());
+    const test = Realm.Credentials.apiKey("x1AvreEIYdlUAlyqaCZyY3ezMuzWpEozc3m4J4ZU6PFns07rZHyZog6p3ZwzaLes");
+    const anonymousUser = await app.logIn(test);
     console.log(anonymousUser);
     const realm = await Realm.open({
       schema: [User, Meeting, onlineMeeting, TimeSlot, Room, workMeeting],
