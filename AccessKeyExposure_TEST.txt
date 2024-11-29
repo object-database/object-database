@@ -1,4 +1,0 @@
-This is a test, to see if GitGuardian acutally works in terms of scanning exposed access keys. DONT BE ALARMED, ALL IS WELL!
-Disclaimer: This key is not active and was created as a test user. 
-Access KeyID: AKIAWHCRIGPOA34F3U4X
-Acess Key Secret: 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
